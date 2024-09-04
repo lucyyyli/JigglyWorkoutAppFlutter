@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:jiggly/utils/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animations/animation_builder/mirror_animation_builder.dart';
@@ -38,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // widgets:--------------------------------------------------------------------
   Widget _buildMainContent() {
+    log("building main content");
     return Center(
       child: Container(
         height: double.infinity,

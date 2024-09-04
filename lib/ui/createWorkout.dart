@@ -1,3 +1,5 @@
+import 'dart:math';
+import 'dart:developer' as dev;
 import 'package:jiggly/utils/routes/routes.dart';
 import 'package:jiggly/widgets/back_button.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +17,7 @@ class CreateWorkoutScreen extends StatefulWidget {
 }
 
 class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
-  int numBlocks = 1;
+  int numBlocks = 0;
   final _formKey = GlobalKey<FormBuilderState>();
 
   @override
@@ -34,8 +36,10 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
       child: Scaffold(
         appBar: _buildAppBar(),
         body: _buildBody(),
-        floatingActionButton: FloatingActionLogoWidget(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: Visibility(
+            visible: MediaQuery.of(context).viewInsets.bottom == 0.0,
+            child: FloatingActionLogoWidget()),
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       ),
     );
   }
@@ -49,7 +53,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
         style: Theme.of(context).textTheme.titleLarge,
       ),
       centerTitle: true,
-      backgroundColor: AppThemeData.appTheme.colorScheme.background,
+      backgroundColor: AppThemeData.appTheme.colorScheme.tertiary,
     );
   }
 
@@ -68,22 +72,12 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
         child: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppThemeData.appTheme.colorScheme.background,
-                  AppThemeData.appTheme.colorScheme.secondary,
-                  AppThemeData.appTheme.colorScheme.secondaryContainer,
-                  AppThemeData.appTheme.colorScheme.primary,
-                ],
-              ),
-            ),
+            color: AppThemeData.appTheme.colorScheme.secondaryContainer,
             child: SingleChildScrollView(
                 child: Column(
               children: <Widget>[
                 _buildForm(),
+                const SizedBox(height: 100),
               ],
             ))),
       ),
@@ -95,20 +89,30 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
       key: _formKey,
       child: Column(
         children: <Widget>[
-          _buildFormWorkoutName(),
-          _buildFormWorkoutType(),
+          const SizedBox(height: 15),
+          Container(
+              height: 165,
+              width: 380,
+              padding: new EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                color: AppThemeData.appTheme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(15.0), // Uniform radius
+                // border: Border.all(
+                //   width: 1,
+                //   color: Theme.of(context).colorScheme.primaryContainer,
+                // ),
+              ),
+              child: Column(children: [
+                _buildFormWorkoutName(),
+                _buildFormWorkoutType(),
+              ])),
+          const SizedBox(height: 15),
           for (int i = 0; i < numBlocks; i++) _buildFormWorkoutBlock(),
-          TextButton(
-            onPressed: () {
-              setState(
-                () {
-                  numBlocks++;
-                  print(numBlocks);
-                },
-              );
-            },
-            child: Text("Add Another Workout Block"),
-          ),
+          Container(
+              alignment: Alignment.center,
+              width: 380,
+              child: _buildFormAddRemoveBlockButton()),
+          const SizedBox(height: 15),
           _saveWorkoutButton(),
         ],
       ),
@@ -121,34 +125,11 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     return FormBuilderTextField(
       autovalidateMode: AutovalidateMode.disabled,
       name: 'workout_name',
+      style: Theme.of(context).textTheme.labelLarge,
       decoration: InputDecoration(
         labelText: "Workout Name",
-        suffixIcon: _titleHasError ? const Icon(Icons.error, color: Colors.red) : null,
-      ),
-      onChanged: (val) {
-        _formKey.currentState?.fields['workout_name']?.validate();
-        setState(
-          () {
-            _titleHasError = !(_formKey.currentState?.fields['title']?.validate() ?? false);
-          },
-        );
-      },
-      // valueTransformer: (text) => num.tryParse(text),
-      validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
-        FormBuilderValidators.maxLength(40),
-      ]),
-      initialValue: 'Untitled Workout',
-      // textInputAction: TextInputAction.next,
-    );
-  }
-
-  Widget _buildFormWorkoutType() {
-    return FormBuilderChoiceChip<String>(
-      autovalidateMode: AutovalidateMode.disabled,
-      alignment: WrapAlignment.spaceEvenly,
-      decoration: InputDecoration(
-        labelText: "Workout Type",
+        labelStyle: Theme.of(context).textTheme.bodyLarge,
+        errorStyle: TextStyle(height: 0.01),
         suffixIcon: IconButton(
           onPressed: () {
             showDialog(
@@ -160,15 +141,46 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
           },
           icon: Icon(Icons.question_mark_rounded),
         ),
+        border: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+      ),
+      validator: FormBuilderValidators.compose([
+        FormBuilderValidators.maxLength(40),
+        FormBuilderValidators.required(),
+      ]),
+      initialValue: 'Untitled Workout',
+    );
+  }
+
+  Widget _buildFormWorkoutType() {
+    return FormBuilderChoiceChip<String>(
+      autovalidateMode: AutovalidateMode.disabled,
+      alignment: WrapAlignment.spaceEvenly,
+      decoration: InputDecoration(
+        hintStyle: TextStyle(
+          height: 1.5, // sets the distance between label and input
+        ),
+        hintText: '',
+        // needed to create space between label and input
+        labelText: "Workout Type",
+        labelStyle: Theme.of(context).textTheme.bodyLarge,
+        errorStyle: TextStyle(height: 0.01),
+        border: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
       ),
       name: 'type',
+      backgroundColor: Theme.of(context).colorScheme.tertiary,
+      selectedColor: Theme.of(context).colorScheme.onTertiary,
       options: [
         FormBuilderChipOption(value: 'Circuit'),
         FormBuilderChipOption(value: 'Continuous'),
       ],
-      onChanged: (val) {
-        _formKey.currentState?.fields['type']?.validate();
-      },
       validator: FormBuilderValidators.compose([
         FormBuilderValidators.required(),
       ]),
@@ -178,7 +190,9 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   Widget workoutTypeExplanationDialog() {
     return AlertDialog(
       title: const Text("Workout Types"),
+      titleTextStyle: Theme.of(context).textTheme.displayMedium,
       content: const Text("A circuit workout is finite."),
+      contentTextStyle: Theme.of(context).textTheme.bodyLarge,
       actions: <Widget>[
         TextButton(
           onPressed: () {
@@ -192,10 +206,24 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
 
   Widget _buildFormWorkoutBlock() {
     return Column(
-      children: <Widget>[
-        _buildFormWorkoutBlockName(),
-        _buildFormWorkoutBlockType(),
-        _buildFormWorkoutBlockLength(),
+      children: [
+        Container(
+          height: 210,
+          width: 380,
+          padding: new EdgeInsets.all(10.0),
+          decoration: BoxDecoration(
+            color: AppThemeData.appTheme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(15.0), // Uniform radius
+          ),
+          child: Column(
+            children: <Widget>[
+              _buildFormWorkoutBlockName(),
+              _buildFormWorkoutBlockType(),
+              _buildFormWorkoutBlockLength(),
+            ],
+          ),
+        ),
+        const SizedBox(height: 15),
       ],
     );
   }
@@ -207,22 +235,31 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     return FormBuilderTextField(
       autovalidateMode: AutovalidateMode.disabled,
       name: fieldName,
+      style: Theme.of(context).textTheme.labelLarge,
       decoration: InputDecoration(
         labelText: "Block Name",
-        suffixIcon: _blockTitleHasError ? const Icon(Icons.error, color: Colors.red) : null,
-      ),
-      onChanged: (val) {
-        _formKey.currentState?.fields[fieldName]?.validate();
-        setState(
-          () {
-            _blockTitleHasError = !(_formKey.currentState?.fields[fieldName]?.validate() ?? false);
+        labelStyle: Theme.of(context).textTheme.bodyLarge,
+        errorStyle: TextStyle(height: 0.01),
+        suffixIcon: IconButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return blockTypeExplanationDialog();
+              },
+            );
           },
-        );
-      },
-      // valueTransformer: (text) => num.tryParse(text),
+          icon: Icon(Icons.question_mark_rounded),
+        ),
+        border: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+      ),
       validator: FormBuilderValidators.compose([
         FormBuilderValidators.required(),
-        FormBuilderValidators.maxLength(30),
+        FormBuilderValidators.maxLength(40),
       ]),
       initialValue: 'Untitled Block ' + numBlocks.toString(),
       // textInputAction: TextInputAction.next,
@@ -237,36 +274,50 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
       alignment: WrapAlignment.spaceEvenly,
       decoration: InputDecoration(
         labelText: "Block Type",
-        suffixIcon: IconButton(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return blockTypeExplanationDialog();
-              },
-            );
-          },
-          icon: Icon(Icons.question_mark_rounded),
-        ),
+        labelStyle: Theme.of(context).textTheme.bodyLarge,
+        errorStyle: TextStyle(height: 0.01),
+        border: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
       ),
       name: fieldName,
+      backgroundColor: Theme.of(context).colorScheme.tertiary,
+      selectedColor: Theme.of(context).colorScheme.onTertiary,
       options: [
         FormBuilderChipOption(value: 'Active'),
         FormBuilderChipOption(value: 'Rest'),
         FormBuilderChipOption(value: 'None'),
       ],
-      onChanged: (val) {
-        _formKey.currentState?.fields[fieldName]?.validate();
-      },
       validator: FormBuilderValidators.compose([
         FormBuilderValidators.required(),
       ]),
     );
   }
 
+  Widget _buildFormAddRemoveBlockButton() {
+    if (numBlocks == 0) {
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            addBlockButton(380),
+          ]);
+    } else {
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            addBlockButton(185),
+            removeBlockButton(),
+          ]);
+    }
+  }
+
   Widget blockTypeExplanationDialog() {
     return AlertDialog(
       title: const Text("Block Types"),
+      titleTextStyle: Theme.of(context).textTheme.displayMedium,
+      contentTextStyle: Theme.of(context).textTheme.bodyLarge,
       content: const Text("Active or Rest."),
       actions: <Widget>[
         TextButton(
@@ -280,11 +331,15 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   }
 
   Widget _buildFormWorkoutBlockLength() {
-    return Column(
-      children: <Widget>[
-        _buildFormWorkoutBlockLengthMins(),
-        _buildFormWorkoutBlockLengthSecs(),
-      ],
+    return Container(
+      width: 210,
+      child: Row(
+        children: <Widget>[
+          _buildFormWorkoutBlockLengthMins(),
+          SizedBox(width: 10),
+          _buildFormWorkoutBlockLengthSecs(),
+        ],
+      ),
     );
   }
 
@@ -292,30 +347,36 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     bool _blockLengthMinsError = false;
     String fieldNameMins = 'block_length_mins_' + numBlocks.toString();
 
-    return FormBuilderTextField(
-      autovalidateMode: AutovalidateMode.disabled,
-      name: fieldNameMins,
-      decoration: InputDecoration(
-        labelText: "mins",
-        hintText: "0",
-        suffixIcon: _blockLengthMinsError ? const Icon(Icons.error, color: Colors.red) : null,
+    return SizedBox(
+      width: 100,
+      child: FormBuilderTextField(
+        autovalidateMode: AutovalidateMode.disabled,
+        name: fieldNameMins,
+        style: Theme.of(context).textTheme.titleMedium,
+        decoration: InputDecoration(
+          hintText: "0",
+          errorStyle: TextStyle(height: 0.01),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+            child: Text(
+              "mins",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          border: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+        ),
+        validator: FormBuilderValidators.compose(
+          [
+            FormBuilderValidators.required(),
+            FormBuilderValidators.numeric(),
+          ],
+        ),
+        keyboardType: TextInputType.number,
       ),
-      onChanged: (val) {
-        _formKey.currentState?.fields[fieldNameMins]?.validate();
-        setState(
-          () {
-            _blockLengthMinsError = !(_formKey.currentState?.fields[fieldNameMins]?.validate() ?? false);
-          },
-        );
-      },
-      // valueTransformer: (text) => num.tryParse(text),
-      validator: FormBuilderValidators.compose(
-        [
-          FormBuilderValidators.required(),
-          FormBuilderValidators.numeric(),
-        ],
-      ),
-      keyboardType: TextInputType.number,
     );
   }
 
@@ -323,51 +384,115 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     bool _blockLengthSecsError = false;
     String fieldNameSecs = 'block_length_secs_' + numBlocks.toString();
 
-    return FormBuilderTextField(
-      autovalidateMode: AutovalidateMode.disabled,
-      name: fieldNameSecs,
-      decoration: InputDecoration(
-        labelText: "secs",
-        hintText: "30",
-        suffixIcon: _blockLengthSecsError ? const Icon(Icons.error, color: Colors.red) : null,
+    return SizedBox(
+      width: 100,
+      child: FormBuilderTextField(
+        autovalidateMode: AutovalidateMode.disabled,
+        name: fieldNameSecs,
+        style: Theme.of(context).textTheme.titleMedium,
+        decoration: InputDecoration(
+          hintText: "0",
+          errorStyle: TextStyle(height: 0.01),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
+            child: Text(
+              "secs",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          border: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          errorBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red.shade700, width: 2.0)),
+          disabledBorder: InputBorder.none,
+        ),
+        validator: FormBuilderValidators.compose(
+          [
+            FormBuilderValidators.required(),
+            FormBuilderValidators.numeric(),
+          ],
+        ),
+        keyboardType: TextInputType.number,
       ),
-      onChanged: (val) {
-        _formKey.currentState?.fields[fieldNameSecs]?.validate();
-        setState(
-          () {
-            _blockLengthSecsError = !(_formKey.currentState?.fields[fieldNameSecs]?.validate() ?? false);
-          },
-        );
-      },
-      // valueTransformer: (text) => num.tryParse(text),
-      validator: FormBuilderValidators.compose(
-        [
-          FormBuilderValidators.required(),
-          FormBuilderValidators.numeric(),
-        ],
-      ),
-      keyboardType: TextInputType.number,
     );
   }
 
   Widget _saveWorkoutButton() {
-    return Text("Save");
+    return Container(
+      padding: EdgeInsets.all(0.0),
+      width: 380,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        color: AppThemeData.appTheme.colorScheme.tertiary,
+      ),
+      child: TextButton(
+        onPressed: () {
+          _formKey.currentState?.validate();
+          if (_formKey.currentState?.isValid == true) {
+            _formKey.currentState?.save();
+          }
+        },
+        child: Text(
+          "Save Workout",
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+      ),
+    );
+  }
+
+  Widget addBlockButton(double width) {
+    return Container(
+      padding: EdgeInsets.all(0.0),
+      width: width,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        color: AppThemeData.appTheme.colorScheme.tertiary,
+      ),
+      child: TextButton(
+        onPressed: () {
+          setState(
+            () {
+              numBlocks++;
+            },
+          );
+        },
+        child: Text(
+          "Add Block",
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+      ),
+    );
+  }
+
+  Widget removeBlockButton() {
+    return Container(
+      padding: EdgeInsets.all(0.0),
+      width: 185,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        color: AppThemeData.appTheme.colorScheme.tertiary,
+      ),
+      child: TextButton(
+        onPressed: () {
+          setState(
+            () {
+              numBlocks--;
+            },
+          );
+        },
+        child: Text(
+          "Remove Block",
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+      ),
+    );
   }
 }
-
-// child: Column(
-// children: <Widget>[
-// TextButton(
-// onPressed: () {
-// Navigator.of(context).pushReplacementNamed(Routes.doWorkout);
-// },
-// child: Text("Start Workout"),
-// ),
-// TextButton(
-// onPressed: () {
-// Navigator.pushNamedAndRemoveUntil(context, '/home', ModalRoute.withName('/'));
-// },
-// child: Text("Return Home"),
-// ),
-// ],
-// ),

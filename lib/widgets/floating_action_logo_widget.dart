@@ -59,6 +59,8 @@ returnHomeDialog(BuildContext context) {
   );
   AlertDialog alert = AlertDialog(
     title: Text("Just Checking"),
+    titleTextStyle: Theme.of(context).textTheme.displayMedium,
+    contentTextStyle: Theme.of(context).textTheme.bodyLarge,
     content: Text("Would you like to return home?"),
     actions: [
       continueButton,

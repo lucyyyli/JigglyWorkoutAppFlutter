@@ -13,14 +13,14 @@ class AppThemeData {
       // Matches manifest.json colors and background color.
       primaryColor: colorScheme.primary,
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.background,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         iconTheme: IconThemeData(color: colorScheme.primary),
         centerTitle: false,
       ),
       iconTheme: IconThemeData(color: colorScheme.onPrimary),
-      canvasColor: colorScheme.background,
-      scaffoldBackgroundColor: colorScheme.background,
+      canvasColor: colorScheme.surface,
+      scaffoldBackgroundColor: colorScheme.surface,
       highlightColor: Colors.transparent,
     );
   }
@@ -32,15 +32,14 @@ class AppThemeData {
     secondaryContainer: Color(0xFF605FA3),
     tertiary: Color(0xFFB8E598),
     tertiaryContainer: Color(0xFF5A805A),
-    background: Color(0xFF9F9DE1),
-    surface: Color(0xFFFAFBFB),
-    onBackground: Color(0xFF241E30),
+    surface: Color(0xFF9F9DE1),
     error: _lightFillColor,
     onError: _lightFillColor,
     onPrimary: Color(0xFF7C7BBB),
     onSecondary: Color(0xFF605FA3),
-    onTertiary: Color(0xFF322942),
-    onSurface: Colors.black,
+    onTertiary: Color(0xFF241E30),
+    onTertiaryContainer: Color(0xFF241E30),
+    onSurface: Color(0xFF241E30),
     brightness: Brightness.light,
   );
 
@@ -50,33 +49,41 @@ class AppThemeData {
   static const _bold = FontWeight.w700;
 
   static final TextTheme _textTheme = TextTheme(
-    headlineLarge: GoogleFonts.montserrat(
-      fontSize: 50.0,
-      color: colorScheme.primary,
-    ),
+    headlineSmall: GoogleFonts.oswald(fontWeight: _medium, fontSize: 16.0),
     headlineMedium: GoogleFonts.barlowCondensed(
       fontSize: 40.0,
       fontWeight: _semiBold,
       fontStyle: FontStyle.italic,
       color: colorScheme.primary,
     ),
-    bodySmall: GoogleFonts.oswald(fontWeight: _semiBold, fontSize: 16.0),
-    headlineSmall: GoogleFonts.oswald(fontWeight: _medium, fontSize: 16.0),
+    headlineLarge: GoogleFonts.montserrat(
+      fontSize: 50.0,
+      color: colorScheme.primary,
+    ),
+
+    bodySmall: GoogleFonts.montserrat(fontWeight: _regular, fontSize: 14.0),
+    bodyMedium: GoogleFonts.montserrat(fontWeight: _regular, fontSize: 16.0),
+    bodyLarge: GoogleFonts.montserrat(fontWeight: _regular, fontSize: 18.0),
+
+    displaySmall: GoogleFonts.montserrat(fontWeight: _bold, fontSize: 14.0),
+    displayMedium: GoogleFonts.montserrat(fontWeight: _bold, fontSize: 16.0),
+    displayLarge: GoogleFonts.montserrat(fontWeight: _bold, fontSize: 18.0),
+
+    labelSmall: GoogleFonts.montserrat(fontWeight: _medium, fontSize: 14.0),
+    labelMedium: GoogleFonts.montserrat(fontWeight: _medium, fontSize: 16.0),
+    labelLarge: GoogleFonts.montserrat(fontWeight: _medium, fontSize: 18.0),
+
+    titleSmall: GoogleFonts.montserrat(fontWeight: _medium, fontSize: 14.0),
     titleMedium: GoogleFonts.montserrat(
       fontWeight: _medium,
       fontSize: 20.0,
       color: colorScheme.primary,
     ),
-    labelSmall: GoogleFonts.montserrat(fontWeight: _medium, fontSize: 12.0),
-    bodyLarge: GoogleFonts.montserrat(fontWeight: _regular, fontSize: 14.0),
-    titleSmall: GoogleFonts.montserrat(fontWeight: _medium, fontSize: 14.0),
-    bodyMedium: GoogleFonts.montserrat(fontWeight: _regular, fontSize: 16.0),
     titleLarge: GoogleFonts.montserrat(
       fontSize: 20.0,
       fontWeight: _bold,
       fontStyle: FontStyle.italic,
       color: colorScheme.primary,
     ),
-    labelLarge: GoogleFonts.montserrat(fontWeight: _semiBold, fontSize: 14.0),
   );
 }

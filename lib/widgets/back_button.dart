@@ -37,12 +37,12 @@ returnDialog(BuildContext context) {
     title: Text(
       "Are you sure you want to go back?",
       textAlign: TextAlign.left,
-      style: Theme.of(context).textTheme.headlineSmall,
+      style: Theme.of(context).textTheme.displayLarge,
     ),
     content: Text(
       "Your unsaved changes will be discarded.",
       textAlign: TextAlign.left,
-      style: Theme.of(context).textTheme.bodySmall,
+      style: Theme.of(context).textTheme.bodyMedium,
     ),
     actions: [
       continueButton,
